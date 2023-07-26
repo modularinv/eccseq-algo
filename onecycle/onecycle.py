@@ -3,10 +3,8 @@ from collections import deque
 
 sys.setrecursionlimit(10 ** 6)
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-#inf = open(os.path.join(__location__, "input.in"), "r")
-#ouf = open(os.path.join(__location__, "output.out"), "w")
-inf = open("input.txt", "r")
-ouf = open("output.out", "w")
+inf = open(os.path.join(__location__, "input.in"), "r")
+ouf = open(os.path.join(__location__, "output.out"), "w")
 
 def my_assert(cond, comment):
     if not cond:
@@ -21,6 +19,7 @@ for i in range(graph_size):
     my_assert(u != v and 0 <= u < graph_size and 0 <= v < graph_size, "wrong input")
     adj[u].append(v)
     adj[v].append(u)
+inf.close()
 ecc = [0] * graph_size
 
 cyc_visited = [False] * graph_size
@@ -118,4 +117,5 @@ for i in range(cyc_size):
 
 for i in range(graph_size):
     my_assert(0 <= ecc[i] < graph_size, "invalid eccentricity")
-    ouf.write(f"{i} {ecc[i]}")
+    ouf.write(f"{i} {ecc[i]}\n")
+ouf.close()
