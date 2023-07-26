@@ -57,15 +57,14 @@ int main() {
 	cyc.push_back(backend);
 
 	int cyc_size = cyc.size();
+    vector<vector<int>> trees(cyc_size);
 	vector<int> depth(graph_size, -1), max_depth(cyc_size, -1);
 	vector<int> dist(graph_size, -1);
 	for (int i = 0; i < cyc_size; i++) {
 		int root = cyc[i];
 		// ecc[root] = max(ecc[root], cyc_size / 2);
-
-		vector<int> vertices;
 		function<void(int, int, vector<int>&)> tree_dfs = [&](int from, int pre, vector<int>& d) {
-			vertices.push_back(from);
+			trees[i].push_back(from);
 			for (int to : adj[from]) {
 				if (to != pre && to != cyc[(i - 1 + cyc_size) % cyc_size] && to != cyc[(i + 1) % cyc_size]) {
 					d[to] = d[from] + 1;
@@ -77,7 +76,7 @@ int main() {
 		tree_dfs(root, -1, depth);
 
 		int deepest = -1;
-		for (int v : vertices) {
+		for (int v : trees[i]) {
 			if (max_depth[i] < depth[v]) {
 				max_depth[i] = depth[v];
 				deepest = v;
@@ -88,7 +87,7 @@ int main() {
 		dist[deepest] = 0;
 		tree_dfs(deepest, -1, dist);
 		int diam_len = -1, farthest = -1;
-		for (int v : vertices) {
+		for (int v : trees[i]) {
 			if (diam_len < dist[v]) {
 				diam_len = dist[v];
 				farthest = v;
@@ -96,41 +95,57 @@ int main() {
 		}
 		my_assert(farthest != -1, "dist array is incorrect");
 
-		for (int v : vertices) {
+		for (int v : trees[i]) {
 			ecc[v] = max(ecc[v], dist[v]);
 		}
 		dist[farthest] = 0;
 		tree_dfs(farthest, -1, dist);
-		for (int v : vertices) {
+		for (int v : trees[i]) {
 			ecc[v] = max(ecc[v], dist[v]);
 		}
 	}
 	
-	vector<int> mod_max(cyc_size);
-	for (int i = 0; i < cyc_size; i++) {
-		mod_max[i] = max_depth[i] + i;
-	}
-	vector<int> ext_cyc = mod_max;
-	for (int i = 0; i < cyc_size; i++) {
-		ext_cyc.push_back(mod_max[i] + cyc_size);
-	}
-	deque<pair<int, int>> dq;
-	int interval = cyc_size / 2 + 1;
-	for (int i = 0; i <= cyc_size + interval - 2; i++) {
-		while (!dq.empty() && dq.front().second <= i - interval) {
-			dq.pop_front();
-		}
-		while (!dq.empty() && dq.back().first < ext_cyc[i]) {
-			dq.pop_back();
-		}
-		dq.emplace_back(ext_cyc[i], i);
+    vector<int> on_cyc(graph_size);
+    auto do_half = [&]() {
+        vector<int> mod_max(cyc_size);
+        for (int i = 0; i < cyc_size; i++) {
+            mod_max[i] = max_depth[i] + i;
+        }
+        vector<int> ext_cyc = mod_max;
+        for (int i = 0; i < cyc_size; i++) {
+            ext_cyc.push_back(mod_max[i] + cyc_size);
+        }
+        deque<pair<int, int>> dq;
+        int interval = cyc_size / 2 + 1;
+        for (int i = 0; i <= cyc_size + interval - 2; i++) {
+            while (!dq.empty() && dq.front().second <= i - interval) {
+                dq.pop_front();
+            }
+            while (!dq.empty() && dq.back().first < ext_cyc[i]) {
+                dq.pop_back();
+            }
+            dq.emplace_back(ext_cyc[i], i);
 
-		if (i >= interval - 1) {
-			ecc[cyc[i - interval + 1]] = max(ecc[cyc[i - interval + 1]], dq.front().first - (i - interval + 1));
-		}
-	}
+            if (i >= interval - 1) {
+                on_cyc[cyc[i - interval + 1]] = max(on_cyc[cyc[i - interval + 1]], dq.front().first - (i - interval + 1));
+            }
+        }
+    };
+    do_half();
+    reverse(cyc.begin(), cyc.end());
+    reverse(max_depth.begin(), max_depth.end());
+    do_half();
+    reverse(cyc.begin(), cyc.end());
+    reverse(max_depth.begin(), max_depth.end());
+
+    for (int i = 0; i < cyc_size; i++) {
+        for (int v : trees[i]) {
+            ecc[v] = max(ecc[v], on_cyc[cyc[i]] + depth[v]);
+        }
+    }
 
 	for (int i = 0; i < graph_size; i++) {
+        my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
 		out << i << ' ' << ecc[i] << '\n';
 	}
 	return 0;
