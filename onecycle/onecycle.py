@@ -50,19 +50,20 @@ cyc.append(backend)
 
 cyc_size = len(cyc)
 trees = [[] for _ in range(cyc_size)]
-depth, max_depth = [-1] * graph_size, [-1] * graph_size
+depth, max_depth = [-1] * graph_size, [-1] * cyc_size
 dist = [-1] * graph_size
 for i in range(cyc_size):
     root = cyc[i]
     # ecc[root] = max(ecc[root], cyc_size // 2)
-    def tree_dfs(cur, pre, d):
-        trees[i].append(cur)
+    def tree_dfs(cur, pre, d, push):
+        if push:
+            trees[i].append(cur)
         for next in adj[cur]:
             if next not in [pre, cyc[i - 1], cyc[(i + 1) % cyc_size]]:
                 d[next] = d[cur] + 1
-                tree_dfs(next, cur, d)
+                tree_dfs(next, cur, d, push)
     depth[root] = 0
-    tree_dfs(root, -1, depth)
+    tree_dfs(root, -1, depth, True)
 
     deepest = -1
     for v in trees[i]:
@@ -72,7 +73,7 @@ for i in range(cyc_size):
     my_assert(deepest != -1, "depth array is incorrect")
 
     dist[deepest] = 0
-    tree_dfs(deepest, -1, dist)
+    tree_dfs(deepest, -1, dist, False)
     diam_len, farthest = -1, -1
     for v in trees[i]:
         if diam_len < dist[v]:
@@ -83,9 +84,10 @@ for i in range(cyc_size):
     for v in trees[i]:
         ecc[v] = max(ecc[v], dist[v])
     dist[farthest] = 0
-    tree_dfs(farthest, -1, dist)
+    tree_dfs(farthest, -1, dist, False)
     for v in trees[i]:
         ecc[v] = max(ecc[v], dist[v])
+my_assert(-1 not in max_depth, "unvisited vertex exists")
 
 on_cyc = [0] * graph_size
 def do_half():

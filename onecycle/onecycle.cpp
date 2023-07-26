@@ -1,4 +1,9 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <fstream>
+#include <functional>
+#include <vector>
+#include <deque>
+#include <utility>
 using namespace std;
 
 int main() {
@@ -63,17 +68,19 @@ int main() {
 	for (int i = 0; i < cyc_size; i++) {
 		int root = cyc[i];
 		// ecc[root] = max(ecc[root], cyc_size / 2);
-		function<void(int, int, vector<int>&)> tree_dfs = [&](int from, int pre, vector<int>& d) {
-			trees[i].push_back(from);
+		function<void(int, int, vector<int>&, bool)> tree_dfs = [&](int from, int pre, vector<int>& d, bool push) {
+			if (push) {
+				trees[i].push_back(from);
+			}
 			for (int to : adj[from]) {
 				if (to != pre && to != cyc[(i - 1 + cyc_size) % cyc_size] && to != cyc[(i + 1) % cyc_size]) {
 					d[to] = d[from] + 1;
-					tree_dfs(to, from, d);
+					tree_dfs(to, from, d, push);
 				}
 			}
 		};
 		depth[root] = 0;
-		tree_dfs(root, -1, depth);
+		tree_dfs(root, -1, depth, true);
 
 		int deepest = -1;
 		for (int v : trees[i]) {
@@ -85,7 +92,7 @@ int main() {
 		my_assert(deepest != -1, "depth array is incorrect");
 
 		dist[deepest] = 0;
-		tree_dfs(deepest, -1, dist);
+		tree_dfs(deepest, -1, dist, false);
 		int diam_len = -1, farthest = -1;
 		for (int v : trees[i]) {
 			if (diam_len < dist[v]) {
@@ -99,11 +106,12 @@ int main() {
 			ecc[v] = max(ecc[v], dist[v]);
 		}
 		dist[farthest] = 0;
-		tree_dfs(farthest, -1, dist);
+		tree_dfs(farthest, -1, dist, false);
 		for (int v : trees[i]) {
 			ecc[v] = max(ecc[v], dist[v]);
 		}
 	}
+	my_assert(find(max_depth.begin(), max_depth.end(), -1) == max_depth.end(), "unvisited vertex exists");
 	
 	vector<int> on_cyc(graph_size);
 	auto do_half = [&]() {
