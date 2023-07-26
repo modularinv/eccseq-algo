@@ -57,7 +57,7 @@ int main() {
 	cyc.push_back(backend);
 
 	int cyc_size = cyc.size();
-    vector<vector<int>> trees(cyc_size);
+	vector<vector<int>> trees(cyc_size);
 	vector<int> depth(graph_size, -1), max_depth(cyc_size, -1);
 	vector<int> dist(graph_size, -1);
 	for (int i = 0; i < cyc_size; i++) {
@@ -105,47 +105,47 @@ int main() {
 		}
 	}
 	
-    vector<int> on_cyc(graph_size);
-    auto do_half = [&]() {
-        vector<int> mod_max(cyc_size);
-        for (int i = 0; i < cyc_size; i++) {
-            mod_max[i] = max_depth[i] + i;
-        }
-        vector<int> ext_cyc = mod_max;
-        for (int i = 0; i < cyc_size; i++) {
-            ext_cyc.push_back(mod_max[i] + cyc_size);
-        }
-        deque<pair<int, int>> dq;
-        int interval = cyc_size / 2 + 1;
-        for (int i = 0; i <= cyc_size + interval - 2; i++) {
-            while (!dq.empty() && dq.front().second <= i - interval) {
-                dq.pop_front();
-            }
-            while (!dq.empty() && dq.back().first < ext_cyc[i]) {
-                dq.pop_back();
-            }
-            dq.emplace_back(ext_cyc[i], i);
+	vector<int> on_cyc(graph_size);
+	auto do_half = [&]() {
+		vector<int> mod_max(cyc_size);
+		for (int i = 0; i < cyc_size; i++) {
+			mod_max[i] = max_depth[i] + i;
+		}
+		vector<int> ext_cyc = mod_max;
+		for (int i = 0; i < cyc_size; i++) {
+			ext_cyc.push_back(mod_max[i] + cyc_size);
+		}
+		deque<pair<int, int>> dq;
+		int interval = cyc_size / 2 + 1;
+		for (int i = 0; i <= cyc_size + interval - 2; i++) {
+			while (!dq.empty() && dq.front().second <= i - interval) {
+				dq.pop_front();
+			}
+			while (!dq.empty() && dq.back().first < ext_cyc[i]) {
+				dq.pop_back();
+			}
+			dq.emplace_back(ext_cyc[i], i);
 
-            if (i >= interval - 1) {
-                on_cyc[cyc[i - interval + 1]] = max(on_cyc[cyc[i - interval + 1]], dq.front().first - (i - interval + 1));
-            }
-        }
-    };
-    do_half();
-    reverse(cyc.begin(), cyc.end());
-    reverse(max_depth.begin(), max_depth.end());
-    do_half();
-    reverse(cyc.begin(), cyc.end());
-    reverse(max_depth.begin(), max_depth.end());
+			if (i >= interval - 1) {
+				on_cyc[cyc[i - interval + 1]] = max(on_cyc[cyc[i - interval + 1]], dq.front().first - (i - interval + 1));
+			}
+		}
+	};
+	do_half();
+	reverse(cyc.begin(), cyc.end());
+	reverse(max_depth.begin(), max_depth.end());
+	do_half();
+	reverse(cyc.begin(), cyc.end());
+	reverse(max_depth.begin(), max_depth.end());
 
-    for (int i = 0; i < cyc_size; i++) {
-        for (int v : trees[i]) {
-            ecc[v] = max(ecc[v], on_cyc[cyc[i]] + depth[v]);
-        }
-    }
+	for (int i = 0; i < cyc_size; i++) {
+		for (int v : trees[i]) {
+			ecc[v] = max(ecc[v], on_cyc[cyc[i]] + depth[v]);
+		}
+	}
 
 	for (int i = 0; i < graph_size; i++) {
-        my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
+		my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
 		out << i << ' ' << ecc[i] << '\n';
 	}
 	return 0;
