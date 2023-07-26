@@ -18,7 +18,7 @@ int main() {
 	};
 	
 	int graph_size, edge_num;
-    in >> graph_size >> edge_num;
+	in >> graph_size >> edge_num;
 	vector<vector<int>> adj(graph_size);
 	for (int i = 0; i < edge_num; i++) {
 		int u, v;
@@ -31,21 +31,21 @@ int main() {
 	vector<int> ecc(graph_size);
 
 	for (int i = 0; i < graph_size; i++) {
-        queue<pair<int, int>> qu;
-        vector<bool> visited(graph_size);
-        qu.emplace(i, 0);
-        visited[i] = true;
-        while (!qu.empty()) {
-            auto [from, dist] = qu.front(); qu.pop();
-            ecc[i] = max(ecc[i], dist);
-            for (int to : adj[from]) {
-                if (!visited[to]) {
-                    qu.emplace(to, dist + 1);
-                    visited[to] = true;
-                }
-            }
-        }
-    }
+		queue<pair<int, int>> qu;
+		vector<bool> visited(graph_size);
+		qu.emplace(i, 0);
+		visited[i] = true;
+		while (!qu.empty()) {
+			auto [from, dist] = qu.front(); qu.pop();
+			ecc[i] = max(ecc[i], dist);
+			for (int to : adj[from]) {
+				if (!visited[to]) {
+					qu.emplace(to, dist + 1);
+					visited[to] = true;
+				}
+			}
+		}
+	}
 
 	for (int i = 0; i < graph_size; i++) {
 		my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
