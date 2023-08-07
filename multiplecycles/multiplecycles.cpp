@@ -14,12 +14,13 @@ int main() {
 	auto my_assert = [&](bool cond, const char* comment) {
 		if (!cond) {
 			out << "Assertion Failed: " << comment << '\n';
+			out.close();
 			exit(0);
 		}
 	};
-	
+
 	int graph_size, edge_num;
-    in >> graph_size >> edge_num;
+	in >> graph_size >> edge_num;
 	vector<vector<int>> adj(graph_size);
 	for (int i = 0; i < edge_num; i++) {
 		int u, v;
@@ -54,7 +55,7 @@ int main() {
 	};
 	cyc_dfs(0, -1);
 	my_assert(!cyc_memo.empty(), "no cycles");
-	
+
 	vector<vector<int>> cyc;
 	for (auto [backstart, backend] : cyc_memo) {
 		cyc.push_back(vector<int>());
@@ -86,6 +87,7 @@ int main() {
 		my_assert(i == 0 || other_cyc != -1, "invalid cycle traversal");
 
 		vector<vector<int>> trees(cyc_len);
+		vector<bool> is_tree(graph_size);
 		vector<int> depth(graph_size, -1), max_depth(cyc_len, -1);
 		vector<int> dist(graph_size, -1);
 		for (int j = 0; j < cyc_len; j++) {
@@ -98,11 +100,12 @@ int main() {
 			function<void(int, int, vector<int>&, int, bool)> tree_dfs = [&](int from, int pre, vector<int>& d, int start, bool push) {
 				if (push) {
 					trees[j].push_back(from);
+					is_tree[from] = true;
 				}
 				for (int to : adj[from]) {
 					if (to != pre && to != cur_cyc[(j - 1 + cyc_len) % cyc_len] && to != cur_cyc[(j + 1) % cyc_len]) {
-						d[to] = d[from] + 1;
-						if (from == start || !is_cycnode[from]) {
+						if ((push && (from == start || !is_cycnode[from])) || is_tree[to]) {
+							d[to] = d[from] + 1;
 							tree_dfs(to, from, d, start, push);
 						}
 					}
@@ -150,7 +153,7 @@ int main() {
 			}
 			vector<int> ext_cyc = mod_max;
 			for (int j = 0; j < cyc_len; j++) {
-				ext_cyc.push_back(mod_max[j] + cyc_len);	
+				ext_cyc.push_back(mod_max[j] + cyc_len);
 			}
 			deque<pair<int, int>> dq;
 			int interval = cyc_len / 2 + 1;
@@ -190,13 +193,13 @@ int main() {
 					auto [from, d] = qu.front(); qu.pop();
 					stretch = max(stretch, d);
 					for (int to : adj[from]) {
-						if (!visited[to]) {
+						if (!visited[to] && depth[to] != -1) {
 							visited[to] = true;
 							qu.emplace(to, d + 1);
 						}
 					}
 				}
-				
+
 				qu.emplace(cur_cyc[j], 0);
 				upd_visited[cur_cyc[j]] = true;
 				while (!qu.empty()) {
@@ -225,5 +228,6 @@ int main() {
 		my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
 		out << i << ' ' << ecc[i] << '\n';
 	}
+	out.close();
 	return 0;
 }
