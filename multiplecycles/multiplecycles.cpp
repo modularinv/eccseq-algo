@@ -73,6 +73,30 @@ int main() {
 			is_cycnode[v] = true;
 		}
 	}
+	vector<vector<pair<int, bool>>> adj_copy(graph_size);
+	for (int i = 0; i < graph_size; i++) {
+		for (int v : adj[i]) {
+			adj_copy[i].emplace_back(v, false);
+		}
+	}
+	for (int i = 0; i < cyc.size(); i++) {
+		int cyc_len = cyc[i].size();
+		for (int j = 0; j < cyc_len; j++) {
+			for (auto& [v, chk] : adj_copy[cyc[i][j]]) {
+				if (v == cyc[i][(j - 1 + cyc_len) % cyc_len] || v == cyc[i][(j + 1) % cyc_len]) {
+					chk = true;
+				}
+			}
+		}
+	}
+	vector<vector<int>> nocyc_adj(graph_size);
+	for (int i = 0; i < graph_size; i++) {
+		for (auto [v, chk] : adj_copy[i]) {
+			if (!chk) {
+				nocyc_adj[i].push_back(v);
+			}
+		}
+	}
 
 	vector<bool> visited(graph_size);
 	for (int i = 0; i < cyc.size(); i++) {
@@ -102,12 +126,12 @@ int main() {
 					trees[j].push_back(from);
 					is_tree[from] = true;
 				}
-				for (int to : adj[from]) {
+				for (int to : nocyc_adj[from]) {
 					if (to != pre && to != cur_cyc[(j - 1 + cyc_len) % cyc_len] && to != cur_cyc[(j + 1) % cyc_len]) {
-						if ((push && (from == start || !is_cycnode[from])) || is_tree[to]) {
+						//if ((push && (!is_cycnode[from] || !is_cycnode[to])) || is_tree[to]) {
 							d[to] = d[from] + 1;
 							tree_dfs(to, from, d, start, push);
-						}
+						//}
 					}
 				}
 			};
