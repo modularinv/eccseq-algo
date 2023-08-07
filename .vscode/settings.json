@@ -4,6 +4,7 @@
         "deque": "cpp",
         "xutility": "cpp",
         "utility": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "functional": "cpp"
     }
 }
