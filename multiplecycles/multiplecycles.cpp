@@ -67,11 +67,9 @@ int main() {
 		cyc.back().push_back(backend);
 	}
 
-	vector<bool> is_cycnode(graph_size);
 	vector<vector<int>> cyc_idx(graph_size);
 	for (int i = 0; i < cyc.size(); i++) {
 		for (int v : cyc[i]) {
-			is_cycnode[v] = true;
 			cyc_idx[v].push_back(i);
 		}
 	}
@@ -123,22 +121,20 @@ int main() {
 			}
 
 			int root = cur_cyc[j];
-			function<void(int, int, vector<int>&, int, bool)> tree_dfs = [&](int from, int pre, vector<int>& d, int start, bool push) {
+			function<void(int, int, vector<int>&, bool)> tree_dfs = [&](int from, int pre, vector<int>& d, bool push) {
 				if (push) {
 					trees[j].push_back(from);
 					is_tree[from] = true;
 				}
 				for (int to : nocyc_adj[from]) {
-					if (to != pre && to != cur_cyc[(j - 1 + cyc_len) % cyc_len] && to != cur_cyc[(j + 1) % cyc_len]) {
-						//if ((push && (!is_cycnode[from] || !is_cycnode[to])) || is_tree[to]) {
-							d[to] = d[from] + 1;
-							tree_dfs(to, from, d, start, push);
-						//}
+					if (to != pre) {
+						d[to] = d[from] + 1;
+						tree_dfs(to, from, d, push);
 					}
 				}
 			};
 			depth[root] = 0;
-			tree_dfs(root, -1, depth, root, true);
+			tree_dfs(root, -1, depth, true);
 
 			int deepest = -1;
 			for (int v : trees[j]) {
@@ -150,7 +146,7 @@ int main() {
 			my_assert(deepest != -1, "depth array is incorrect");
 
 			dist[deepest] = 0;
-			tree_dfs(deepest, -1, dist, deepest, false);
+			tree_dfs(deepest, -1, dist, false);
 			int diam_len = -1, farthest = -1;
 			for (int v : trees[j]) {
 				if (diam_len < dist[v]) {
@@ -164,7 +160,7 @@ int main() {
 				ecc[v] = max(ecc[v], dist[v]);
 			}
 			dist[farthest] = 0;
-			tree_dfs(farthest, -1, dist, farthest, false);
+			tree_dfs(farthest, -1, dist, false);
 			for (int v : trees[j]) {
 				ecc[v] = max(ecc[v], dist[v]);
 			}
@@ -260,10 +256,21 @@ int main() {
  	};
 	process_cyc(0, -1);
 
+	vector<int> cnt(graph_size);
 	for (int i = 0; i < graph_size; i++) {
 		my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
-		out << i << ' ' << ecc[i] << '\n';
+		cnt[ecc[i]]++;
 	}
+	vector<int> eccseq;
+	for (int i = 0; i < graph_size; i++) {
+		for (int j = 0; j < cnt[i]; j++) {
+			eccseq.push_back(i);
+		}
+	}
+	for (int i = 0; i < eccseq.size(); i++) {
+		out << eccseq[i] << ' ';
+	}
+	out << '\n';
 	out.close();
 	return 0;
 }
