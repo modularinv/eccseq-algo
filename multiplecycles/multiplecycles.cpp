@@ -68,9 +68,11 @@ int main() {
 	}
 
 	vector<bool> is_cycnode(graph_size);
+	vector<vector<int>> cyc_idx(graph_size);
 	for (int i = 0; i < cyc.size(); i++) {
 		for (int v : cyc[i]) {
 			is_cycnode[v] = true;
+			cyc_idx[v].push_back(i);
 		}
 	}
 	vector<vector<pair<int, bool>>> adj_copy(graph_size);
@@ -99,7 +101,7 @@ int main() {
 	}
 
 	vector<bool> visited(graph_size);
-	for (int i = 0; i < cyc.size(); i++) {
+	function<void(int, int)> process_cyc = [&](int i, int prev_cyc) {
 		vector<int> cur_cyc = cyc[i];
 		int cyc_len = cur_cyc.size(), other_cyc = -1;
 		for (int j = 0; j < cyc_len; j++) {
@@ -246,7 +248,17 @@ int main() {
 				}
 			}
 		}
-	}
+		for (int j = 0; j < cyc_len; j++) {
+			for (int v : trees[j]) {
+				for (int next_cyc : cyc_idx[v]) {
+					if (next_cyc != prev_cyc && next_cyc != i) {
+						process_cyc(next_cyc, i);
+					}
+				}
+			}
+		}
+ 	};
+	process_cyc(0, -1);
 
 	for (int i = 0; i < graph_size; i++) {
 		my_assert(0 <= ecc[i] && ecc[i] < graph_size, "invalid eccentricity");
