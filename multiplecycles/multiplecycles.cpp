@@ -111,12 +111,12 @@ int main() {
 		my_assert(i == 0 || other_cyc != -1, "invalid cycle traversal");
 
 		vector<vector<int>> trees(cyc_len);
-		vector<bool> is_tree(graph_size);
 		vector<int> depth(graph_size, -1), max_depth(cyc_len, -1);
 		vector<int> dist(graph_size, -1);
 		for (int j = 0; j < cyc_len; j++) {
 			if (j == other_cyc) {
 				max_depth[j] = ecc[cur_cyc[j]];
+				trees[j].push_back(cur_cyc[j]);
 				continue;
 			}
 
@@ -124,7 +124,6 @@ int main() {
 			function<void(int, int, vector<int>&, bool)> tree_dfs = [&](int from, int pre, vector<int>& d, bool push) {
 				if (push) {
 					trees[j].push_back(from);
-					is_tree[from] = true;
 				}
 				for (int to : nocyc_adj[from]) {
 					if (to != pre) {
@@ -135,7 +134,7 @@ int main() {
 			};
 			depth[root] = 0;
 			tree_dfs(root, -1, depth, true);
-
+			
 			int deepest = -1;
 			for (int v : trees[j]) {
 				if (max_depth[j] < depth[v]) {
@@ -166,7 +165,7 @@ int main() {
 			}
 		}
 		my_assert(find(max_depth.begin(), max_depth.end(), -1) == max_depth.end(), "unvisited vertex exists");
-
+		
 		vector<int> on_cyc(graph_size);
 		auto do_half = [&]() {
 			vector<int> mod_max(cyc_len);
@@ -199,7 +198,7 @@ int main() {
 		do_half();
 		reverse(cur_cyc.begin(), cur_cyc.end());
 		reverse(max_depth.begin(), max_depth.end());
-
+		
 		vector<bool> upd_visited(graph_size);
 		for (int j = 0; j < cyc_len; j++) {
 			if (j != other_cyc) {
@@ -221,7 +220,7 @@ int main() {
 						}
 					}
 				}
-
+				
 				qu.emplace(cur_cyc[j], 0);
 				upd_visited[cur_cyc[j]] = true;
 				while (!qu.empty()) {
@@ -236,6 +235,7 @@ int main() {
 				}
 			}
 		}
+		
 
 		if (other_cyc == -1) {
 			for (int j = 0; j < cyc_len; j++) {

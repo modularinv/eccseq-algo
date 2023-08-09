@@ -9,6 +9,7 @@ ouf = open(os.path.join(__location__, "output.out"), "w")
 def my_assert(cond, comment):
     if not cond:
         ouf.write(f"Assertion Failed: {comment}")
+        ouf.close()
         sys.exit(0)
 
 graph_size, edge_num = map(int, inf.readline().rstrip().split())
@@ -36,7 +37,15 @@ for i in range(graph_size):
                 qu.append((next, dist + 1))
                 visited[next] = True
 
+cnt = [0] * graph_size
 for i in range(graph_size):
     my_assert(0 <= ecc[i] < graph_size, "invalid eccentricity")
-    ouf.write(f"{i} {ecc[i]}\n")
+    cnt[ecc[i]] += 1
+eccseq = []
+for i in range(graph_size):
+    for j in range(cnt[i]):
+        eccseq.append(i)
+for i in range(len(eccseq)):
+    ouf.write(f"{eccseq[i]} ")
+ouf.write("\n")
 ouf.close()

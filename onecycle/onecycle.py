@@ -9,6 +9,7 @@ ouf = open(os.path.join(__location__, "output.out"), "w")
 def my_assert(cond, comment):
     if not cond:
         ouf.write(f"Assertion Failed: {comment}")
+        ouf.close()
         sys.exit(0)
 
 graph_size = int(inf.readline().rstrip())
@@ -64,7 +65,7 @@ for i in range(cyc_size):
                 tree_dfs(next, cur, d, push)
     depth[root] = 0
     tree_dfs(root, -1, depth, True)
-
+    
     deepest = -1
     for v in trees[i]:
         if max_depth[i] < depth[v]:
@@ -100,7 +101,7 @@ def do_half():
     for i in range(cyc_size + interval - 1):
         while dq and dq[0][1] <= i - interval:
             dq.popleft()
-        while dq and dq[-1][0] <= ext_cyc[i]:
+        while dq and dq[-1][0] < ext_cyc[i]:
             dq.pop()
         dq.append((ext_cyc[i], i))
 
@@ -117,7 +118,15 @@ for i in range(cyc_size):
     for v in trees[i]:
         ecc[v] = max(ecc[v], on_cyc[cyc[i]] + depth[v])
 
+cnt = [0] * graph_size
 for i in range(graph_size):
     my_assert(0 <= ecc[i] < graph_size, "invalid eccentricity")
-    ouf.write(f"{i} {ecc[i]}\n")
+    cnt[ecc[i]] += 1
+eccseq = []
+for i in range(graph_size):
+    for j in range(cnt[i]):
+        eccseq.append(i)
+for i in range(len(eccseq)):
+    ouf.write(f"{eccseq[i]} ")
+ouf.write("\n")
 ouf.close()
