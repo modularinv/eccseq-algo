@@ -177,8 +177,8 @@ int main() {
 				ext_cyc.push_back(mod_max[j] + cyc_len);
 			}
 			deque<pair<int, int>> dq;
-			int interval = cyc_len / 2 + 1;
-			for (int j = 0; j <= cyc_len + interval - 2; j++) {
+			int interval = cyc_len / 2;
+			for (int j = 0; j <= cyc_len + interval - 1; j++) {
 				while (!dq.empty() && dq.front().second <= j - interval) {
 					dq.pop_front();
 				}
@@ -187,8 +187,8 @@ int main() {
 				}
 				dq.emplace_back(ext_cyc[j], j);
 
-				if (j >= interval - 1) {
-					on_cyc[cur_cyc[j - interval + 1]] = max(on_cyc[cur_cyc[j - interval + 1]], dq.front().first - (j - interval + 1));
+				if (j >= interval) {
+					on_cyc[cur_cyc[j - interval]] = max(on_cyc[cur_cyc[j - interval]], dq.front().first - (j - interval));
 				}
 			}
 		};

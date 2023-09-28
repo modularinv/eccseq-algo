@@ -97,16 +97,16 @@ def do_half():
     for i in range(cyc_size):
         ext_cyc.append(mod_max[i] + cyc_size)
     dq = deque()
-    interval = cyc_size // 2 + 1
-    for i in range(cyc_size + interval - 1):
+    interval = cyc_size // 2
+    for i in range(cyc_size + interval):
         while dq and dq[0][1] <= i - interval:
             dq.popleft()
         while dq and dq[-1][0] < ext_cyc[i]:
             dq.pop()
         dq.append((ext_cyc[i], i))
 
-        if i >= interval - 1:
-            on_cyc[cyc[i - interval + 1]] = max(on_cyc[cyc[i - interval + 1]], dq[0][0] - (i - interval + 1))
+        if i >= interval:
+            on_cyc[cyc[i - interval]] = max(on_cyc[cyc[i - interval]], dq[0][0] - (i - interval))
 do_half()
 cyc.reverse()
 max_depth.reverse()

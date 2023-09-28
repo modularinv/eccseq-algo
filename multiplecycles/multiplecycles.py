@@ -135,16 +135,16 @@ def process_cyc(i, prev_cyc):
         for j in range(cyc_len):
             ext_cyc.append(mod_max[j] + cyc_len)
         dq = deque()
-        interval = cyc_len // 2 + 1
-        for j in range(cyc_len + interval - 1):
+        interval = cyc_len // 2
+        for j in range(cyc_len + interval):
             while dq and dq[0][1] <= j - interval:
                 dq.popleft()
             while dq and dq[-1][0] < ext_cyc[j]:
                 dq.pop()
             dq.append((ext_cyc[j], j))
 
-            if j >= interval - 1:
-                on_cyc[cur_cyc[j - interval + 1]] = max(on_cyc[cur_cyc[j - interval + 1]], dq[0][0] - (j - interval + 1))
+            if j >= interval:
+                on_cyc[cur_cyc[j - interval]] = max(on_cyc[cur_cyc[j - interval]], dq[0][0] - (j - interval))
     do_half()
     cur_cyc.reverse()
     max_depth.reverse()
