@@ -5,6 +5,8 @@
         "xutility": "cpp",
         "utility": "cpp",
         "iostream": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "iosfwd": "cpp",
+        "chrono": "cpp"
     }
 }

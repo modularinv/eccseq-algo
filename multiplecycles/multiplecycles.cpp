@@ -7,6 +7,8 @@
 #include <utility>
 using namespace std;
 
+
+
 int main() {
 	ifstream in("input.in");
 	ofstream out("output.out");
@@ -98,9 +100,10 @@ int main() {
 		}
 	}
 
-	vector<bool> visited(graph_size);
-	function<void(int, int)> process_cyc = [&](int i, int prev_cyc) {
+	vector<bool> visited(graph_size), chk_cyc(cyc.size());
+	function<void(int)> process_cyc = [&](int i) {
 		vector<int> cur_cyc = cyc[i];
+		chk_cyc[i] = true;
 		int cyc_len = cur_cyc.size(), other_cyc = -1;
 		for (int j = 0; j < cyc_len; j++) {
 			if (visited[cur_cyc[j]]) {
@@ -247,14 +250,14 @@ int main() {
 		for (int j = 0; j < cyc_len; j++) {
 			for (int v : trees[j]) {
 				for (int next_cyc : cyc_idx[v]) {
-					if (next_cyc != prev_cyc && next_cyc != i) {
-						process_cyc(next_cyc, i);
+					if (!chk_cyc[next_cyc]) {
+						process_cyc(next_cyc);
 					}
 				}
 			}
 		}
  	};
-	process_cyc(0, -1);
+	process_cyc(0);
 
 	vector<int> cnt(graph_size);
 	for (int i = 0; i < graph_size; i++) {

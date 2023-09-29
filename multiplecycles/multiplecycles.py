@@ -75,8 +75,10 @@ for i in range(graph_size):
             nocyc_adj[i].append(v)
 
 visited = [False] * graph_size
-def process_cyc(i, prev_cyc):
+chk_cyc = [False] * len(cyc)
+def process_cyc(i):
     cur_cyc = cyc[i][:]
+    chk_cyc[i] = True
     cyc_len, other_cyc = len(cur_cyc), -1
     for j in range(cyc_len):
         if visited[cur_cyc[j]]:
@@ -188,9 +190,9 @@ def process_cyc(i, prev_cyc):
     for j in range(cyc_len):
         for v in trees[j]:
             for next_cyc in cyc_idx[v]:
-                if next_cyc not in [prev_cyc, i]:
-                    process_cyc(next_cyc, i)
-process_cyc(0, -1)
+                if not chk_cyc[next_cyc]:
+                    process_cyc(next_cyc)
+process_cyc(0)
 
 cnt = [0] * graph_size
 for i in range(graph_size):
